@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	noaaclient "github.com/mornindew/sledgeconf2021/internal/noaa-client"
+	noaaclient "github.com/mornindew/sledgeconf2021/pkg/noaa-client"
 )
 
 //Created a map (for human readability)

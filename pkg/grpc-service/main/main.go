@@ -6,10 +6,10 @@ import (
 	"net"
 	"time"
 
-	noaaclient "github.com/mornindew/sledgeconf2021/internal/noaa-client"
-	tidesandcurrents "github.com/mornindew/sledgeconf2021/internal/tides-and-currents"
 	customerrors "github.com/mornindew/sledgeconf2021/pkg/custom-errors"
 	sledgconf_demo_proto_v1 "github.com/mornindew/sledgeconf2021/pkg/grpc-service/genProto"
+	noaaclient "github.com/mornindew/sledgeconf2021/pkg/noaa-client"
+	tidesandcurrents "github.com/mornindew/sledgeconf2021/pkg/tides-and-currents"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

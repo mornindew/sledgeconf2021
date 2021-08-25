@@ -10,7 +10,7 @@ import (
 	customerrors "github.com/mornindew/sledgeconf2021/pkg/custom-errors"
 	sledgconf_demo_proto_v1 "github.com/mornindew/sledgeconf2021/pkg/grpc-service/genProto"
 
-	"github.com/mornindew/sledgeconf2021/internal/utils"
+	"github.com/mornindew/sledgeconf2021/pkg/utils"
 )
 
 //Define the struct
