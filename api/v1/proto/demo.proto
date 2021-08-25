@@ -1,0 +1,79 @@
+
+//Interface Definition
+
+//Proto version number - should be 3
+syntax = "proto3";
+//Package to provide a unique name and helps with importing
+option go_package = "sledgconf-demo-proto-v1";
+
+//Service Definition
+service ExampleReddiyoGRPCService {
+    //Single Function that will get the data
+    rpc GetDataFromStations (GetDataFromStationsRequest) returns (GetDataFromStationsResponse);
+}
+
+//Message Definitions
+message GetDataFromStationsRequest {
+    repeated string arrayOfStationIDs =1;
+    int64 startTimeEpochInSeconds =2;
+    int64 endTimeEpochInSeconds =3;
+    string datum =4;
+    MetricPreference MetricPreference =5; 
+    
+}
+
+message GetDataFromStationsResponse {
+    map<string,Station> mapOfStationData=1;
+}
+
+message ProductDataValues {
+    Metadata metadata =1;
+    repeated Data data =2;
+    DataType dataType =3;
+}
+
+message Metadata {
+    string id =1;
+    string name =2;
+    string lon =3;
+    string lat =4;
+}
+
+message Data {
+    string t =1;
+    string v=2;
+    string f=3;
+}
+
+message Station {
+    string stationID =1;
+    map<string,ProductDataValues> productData=2;
+}
+
+//Enums
+enum DataType {
+    WaterLevel = 0;
+	AirTemperature =1;
+	WaterTemperature=2;
+	Wind=3;
+	AirPressure =4;
+	AirGap=5;
+	Conductivity =6;
+	Visibility =7;
+	Humidity =8;
+	Salinity =9;
+	HourlyHeight =10;
+	HighLow =11;
+	DailyMean =12;
+	MonthlyMean =13;
+	OneMinuteWaterLevel =14;
+	Preditions =15;
+	Datums =16;
+	Currents=17;
+	CurrentsPredictions=18;
+  }
+  
+  enum MetricPreference {
+      English =0;
+      Metric =1;
+  }
