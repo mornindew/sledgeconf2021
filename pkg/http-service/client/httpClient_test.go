@@ -1,34 +1,67 @@
 package httpclient
 
 import (
-	"math/rand"
-	"reflect"
+	"fmt"
+	"strconv"
 	"testing"
+	"time"
+
+	sledgconf_demo_proto_v1 "github.com/mornindew/sledgeconf2021/pkg/grpc-service/genProto"
 )
+
+//Created a map (for human readability)
+var testingConstants = map[string]string{
+	"8454000": "Providence",
+	"8452944": "Conimicut Light",
+	"8453662": "Providence Visibility",
+	"8452951": "Potter Cove",
+	"8447412": "Fall River Visibility",
+	"8447387": "Borden Flats Light at Fall River",
+	"8447386": "Fall River",
+	"8452314": "Sandy Point Visibility",
+	"8454049": "Quonset Point",
+}
 
 //ReverseArrays - simple client function that will call the httpService and reverse the arrays
 func TestReverseArrays(t *testing.T) {
 
 	serviceName := "localhost:8888"
-	arrayOfFloats := make([]float32, 100)
-	for i := 0; i < 100; i++ {
-		value := rand.Float32()
-		arrayOfFloats[i] = value
-	}
-
-	reversedArray, err := ReverseArrays(serviceName, &arrayOfFloats)
+	client, err := CreateClient(serviceName)
 	if err != nil {
-		t.Error(err.Error())
+		t.Error("error creating a client")
+		return
 	}
 
-	//Re-reverse back to the orinal
-	reReversedArray, err := ReverseArrays(serviceName, reversedArray)
-	if err != nil {
-		t.Error("Error Rereversing: " + err.Error())
+	//Convert the station list to a map
+	stationIDs := make([]string, 0)
+	for key := range testingConstants {
+		stationIDs = append(stationIDs, key)
 	}
 
-	//Teset that the reReversed is equal
-	if !reflect.DeepEqual(arrayOfFloats, *reReversedArray) {
-		t.Error("Not Equal")
+	//Put all the stations in the map
+	//Get the last 24 hours worth of data
+	endTime := time.Now()
+	startTime := endTime.AddDate(0, 0, -1)
+	//Create a Map to put the data in
+	mapOfStations := make(map[string]*sledgconf_demo_proto_v1.Station)
+	//Time the call
+	callStartTime := time.Now()
+	//Loop through the stations
+	for _, statID := range stationIDs {
+		//stationData, err := GetStationDataSync(stationIDs, &startTime, &endTime, noaaclient.CRD, noaaclient.Metric.String())
+		stationData, err := client.GetDataFromStation(statID, &startTime, &endTime, "CRD", sledgconf_demo_proto_v1.MetricPreference_English)
+		if err != nil {
+			t.Error(err.Error())
+			return
+		}
+		mapOfStations[statID] = stationData
 	}
+	callEndTime := time.Now()
+	callTime := callEndTime.Sub(callStartTime)
+	fmt.Println("Call Duration In Millis: " + strconv.FormatInt(callTime.Milliseconds(), 10))
+
+	if len(mapOfStations) == 0 {
+		t.Error("Empty Map")
+	}
+
 }

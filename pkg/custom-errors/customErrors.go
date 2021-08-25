@@ -30,6 +30,24 @@ func (e BadFormat) Error() string {
 	return e.Msg
 }
 
+//Bad Format Error
+type BadRequest struct {
+	Msg string
+}
+
+func (e BadRequest) Error() string {
+	return e.Msg
+}
+
+//Not Found Error
+type NotFoundError struct {
+	Msg string
+}
+
+func (e NotFoundError) Error() string {
+	return e.Msg
+}
+
 //InternalServerError - since it is generic it has an internal server code on it
 type InternalServerError struct {
 	Msg               string
@@ -47,4 +65,16 @@ type ClientConstructionError struct {
 
 func (e ClientConstructionError) Error() string {
 	return e.Msg
+}
+
+/*
+HTTPError - Generic Error
+*/
+type HTTPError struct {
+	Msg  string
+	Code int
+}
+
+func (e HTTPError) Error() string {
+	return e.Msg + " Error Code: " + strconv.Itoa(e.Code)
 }
