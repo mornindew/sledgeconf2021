@@ -50,20 +50,25 @@ func ConstructClient(location string) (*GrpcServiceClient, error) {
 /*
 ReverseArray - call into the grpcService and will reverse the array
 */
-func (client *GrpcServiceClient) GetDataFromStations(arrayToReverse *[]string) (*map[string]*sledgconf_demo_proto_v1.Station, error) {
+func (client *GrpcServiceClient) GetDataFromStations(stationIDs *[]string, startTime, endTime *time.Time, datum string, metricPreference sledgconf_demo_proto_v1.MetricPreference) (*map[string]*sledgconf_demo_proto_v1.Station, error) {
 	//Precondition Check - I do a precondition check in the client to avoid making a call to the server for anything that isn't well constructed
-	if arrayToReverse == nil || len(*arrayToReverse) == 0 {
-		return nil, customerrors.PreconditionError{Msg: "Empty Array"}
+	//Pattern that I follow here is that I typically check for the existance of mandatory data in the client but check for quality of data in the server
+	if stationIDs == nil || len(*stationIDs) == 0 || startTime == nil || endTime == nil || datum == "" {
+		return nil, customerrors.PreconditionError{Msg: "Missing Mandatory Data"}
 	}
 
 	//sets up the cancel function and the context
-	ctx, cancel := context.WithTimeout(context.Background(), client.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
 	//Construct the protobuf params
 	//We don't let the protobuf structs leak out of the client or the server layer
 	request := &sledgconf_demo_proto_v1.GetDataFromStationsRequest{
-		ArrayOfStationIDs: *arrayToReverse,
+		ArrayOfStationIDs:       *stationIDs,
+		StartTimeEpochInSeconds: startTime.Unix(),
+		EndTimeEpochInSeconds:   endTime.Unix(),
+		Datum:                   datum,
+		MetricPreference:        metricPreference,
 	}
 	//Make the call to the server
 	response, err := client.userConn.GetDataFromStations(ctx, request)
