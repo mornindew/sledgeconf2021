@@ -22,8 +22,8 @@ var testingConstants = map[string]string{
 	"8454049": "Quonset Point",
 }
 
-//ReverseArrays - simple client function that will call the httpService and reverse the arrays
-func TestReverseArrays(t *testing.T) {
+//TestGetStationDataOverHTTP - simple client function that will call the httpService and reverse the arrays
+func TestGetStationDataOverHTTP(t *testing.T) {
 
 	serviceName := "localhost:8888"
 	client, err := CreateClient(serviceName)
@@ -63,5 +63,4 @@ func TestReverseArrays(t *testing.T) {
 	if len(mapOfStations) == 0 {
 		t.Error("Empty Map")
 	}
-
 }
