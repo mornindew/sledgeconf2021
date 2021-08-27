@@ -1,5 +1,7 @@
 FROM mornindew/base-demo-protobuf:latest as builder
 
+ENV GO111MODULE=off
+
 RUN apk add git
 RUN apk --update add ca-certificates
 WORKDIR /go/src
