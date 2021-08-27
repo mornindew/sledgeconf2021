@@ -56,7 +56,7 @@ Slides from the presentation are stored in github in the in the docs/presentatio
 |   |
 |   |─── noaa-client - a client package to talking to the Noaa Servers and pulling station data
 |   |
-|   └─── tides-and-currents - the package that handles knowing how to request data from Noaa, validate data, and concatonate the data
+|   └─── station - the package that handles knowing how to request data from Noaa, validate data, and concatonate the data
 |   |
 |   └─── utils - just a basic utilities package to be used across all code
 |   |
