@@ -19,7 +19,6 @@ message GetDataFromStationsRequest {
     int64 endTimeEpochInSeconds =3;
     string datum =4;
     MetricPreference MetricPreference =5; 
-    
 }
 
 message GetDataFromStationsResponse {

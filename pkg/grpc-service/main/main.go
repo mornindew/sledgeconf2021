@@ -1,3 +1,4 @@
+//Main package for running the GRPC server
 package main
 
 import (
@@ -9,7 +10,7 @@ import (
 	customerrors "github.com/mornindew/sledgeconf2021/pkg/custom-errors"
 	sledgconf_demo_proto_v1 "github.com/mornindew/sledgeconf2021/pkg/grpc-service/genProto"
 	noaaclient "github.com/mornindew/sledgeconf2021/pkg/noaa-client"
-	tidesandcurrents "github.com/mornindew/sledgeconf2021/pkg/tides-and-currents"
+	"github.com/mornindew/sledgeconf2021/pkg/station"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -18,6 +19,15 @@ import (
 // server is used to implement the GRPC Service
 type server struct{}
 
+//GetDataFromStations - Server side method to handle getting data from teh stations
+//
+//Returns:  GRPC response with all the station Data
+//
+//ERROR:  GRPC Error Codes
+//	Failed Precondition
+//	Invalid Argument
+//  Invalid Data
+//	Internal
 func (s *server) GetDataFromStations(ctx context.Context, in *sledgconf_demo_proto_v1.GetDataFromStationsRequest) (*sledgconf_demo_proto_v1.GetDataFromStationsResponse, error) {
 
 	//Precondition check - ensure that there are values in the station ID list
@@ -38,7 +48,7 @@ func (s *server) GetDataFromStations(ctx context.Context, in *sledgconf_demo_pro
 		return nil, status.Errorf(codes.InvalidArgument, "The Datum Is Not a valid datum")
 	}
 	//Get the station data
-	mapOfStationData, err := tidesandcurrents.GetStationDataAsync(in.ArrayOfStationIDs, &startTime, &endTime, datum, in.MetricPreference.String())
+	mapOfStationData, err := station.RetrieveAllStationDataConcurrently(in.ArrayOfStationIDs, &startTime, &endTime, datum, in.MetricPreference.String())
 	//Handle errors
 	if err != nil {
 		switch err.(type) {
@@ -52,7 +62,6 @@ func (s *server) GetDataFromStations(ctx context.Context, in *sledgconf_demo_pro
 	}
 	//Create the response object
 	response := &sledgconf_demo_proto_v1.GetDataFromStationsResponse{MapOfStationData: *mapOfStationData}
-
 	return response, nil
 }
 
@@ -64,6 +73,7 @@ func main() {
 	}
 	s := grpc.NewServer()
 	//Load the protobuf definition
+	//It won't compile if the server is missing the required methods
 	sledgconf_demo_proto_v1.RegisterExampleReddiyoGRPCServiceServer(s, &server{})
 
 	err = s.Serve(lis)

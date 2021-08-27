@@ -2,7 +2,7 @@ package customerrors
 
 import "strconv"
 
-//Generic error for handling precondition errors
+//PreconditionError - This is used if any mandatory data needed for a function to complete isn't available.
 type PreconditionError struct {
 	Msg string
 }
@@ -11,7 +11,7 @@ func (e PreconditionError) Error() string {
 	return e.Msg
 }
 
-//Generic error for anythign with invalid data
+//InvalidData - Error that will occur if the data is present but isn't correct
 type InvalidData struct {
 	Msg               string
 	InternalErrorCode int
@@ -21,7 +21,7 @@ func (e InvalidData) Error() string {
 	return e.Msg + " Error Code: " + strconv.Itoa(e.InternalErrorCode)
 }
 
-//Bad Format Error
+//Bad Format Error - used when the format of the data is incorrect
 type BadFormat struct {
 	Msg string
 }
@@ -30,7 +30,7 @@ func (e BadFormat) Error() string {
 	return e.Msg
 }
 
-//Bad Format Error
+//Bad Request - This is used when the actual request (typically HTTP) isn't formatted correctly
 type BadRequest struct {
 	Msg string
 }
@@ -39,7 +39,7 @@ func (e BadRequest) Error() string {
 	return e.Msg
 }
 
-//Not Found Error
+//Not Found Error - used if an entity isn't available
 type NotFoundError struct {
 	Msg string
 }
@@ -58,7 +58,7 @@ func (e InternalServerError) Error() string {
 	return e.Msg + " Error Code: " + strconv.Itoa(e.InternalErrorCode)
 }
 
-//Client Connection ERror
+//Client Connection Error - Custom error for when we are unable to create a client connection
 type ClientConstructionError struct {
 	Msg string
 }
@@ -68,7 +68,7 @@ func (e ClientConstructionError) Error() string {
 }
 
 /*
-HTTPError - Generic Error
+HTTPError - Generic Error for unhandled HTTP errors
 */
 type HTTPError struct {
 	Msg  string

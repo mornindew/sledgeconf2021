@@ -88,4 +88,6 @@ Command to Build and Run
 
 ### Sample Call To NOAA API
 
+Below is an example call that you can drop into your browser to see what some of the data looks like.
+
 <https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=20210808%2015:00&end_date=20210820%2015:06&station=8454000&product=water_temperature&units=english&time_zone=gmt&application=ports_screen&format=json>

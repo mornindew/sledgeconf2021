@@ -1,4 +1,6 @@
-package tidesandcurrents
+//this package will handle any logic associate with knowing how to get the most current tide and current information for a station
+//Right now it pulls its source information from NOAA but could be updated at a later time to have more sources
+package station
 
 import (
 	"sync"
@@ -9,17 +11,13 @@ import (
 	noaaclient "github.com/mornindew/sledgeconf2021/pkg/noaa-client"
 )
 
-/*
-Function to get the tides and currents Syncronously
-
-Returns a map with each station and all available data
-
-Errors:
-	PreconditionError - missing mandatory data
-	InvalidData - incorrect data
-	InternalServerError - unhandled error
-*/
-func GetStationDataSync(stationIDs []string, startDate, endDate *time.Time, datum noaaclient.Datum, preferredMetric string) (*map[string]*sledgconf_demo_proto_v1.Station, error) {
+//GetStationDataSync - Function to get the tides and currents Syncronously.  It will returns a map with each station and all available data
+//
+//	Errors:
+//	PreconditionError - missing mandatory data
+//	InvalidData - incorrect data
+//	InternalServerError - unhandled error
+func RetrieveAllStationDataSync(stationIDs []string, startDate, endDate *time.Time, datum noaaclient.Datum, preferredMetric string) (*map[string]*sledgconf_demo_proto_v1.Station, error) {
 	//Precondition check
 	if len(stationIDs) == 0 || startDate == nil || endDate == nil {
 		return nil, customerrors.PreconditionError{Msg: "Missing Mandatory Data"}
@@ -54,17 +52,13 @@ func GetStationDataSync(stationIDs []string, startDate, endDate *time.Time, datu
 	return &mapToReturnOfAllStations, nil
 }
 
-/*
-Function to get the tides and currents Asyncronously
-
-Returns a map with each station and all available data
-
-Errors:
-	PreconditionError - missing mandatory data
-	InvalidData - incorrect data
-	InternalServerError - unhandled error
-*/
-func GetStationDataAsync(stationIDs []string, startDate, endDate *time.Time, datum noaaclient.Datum, preferredMetric string) (*map[string]*sledgconf_demo_proto_v1.Station, error) {
+//Function to get the tides and currents concurrently.  It will run all the calls in parallel and will be much faster than the sync call.
+//
+//	Errors:
+//	PreconditionError - missing mandatory data
+//	InvalidData - incorrect data
+//	InternalServerError - unhandled error
+func RetrieveAllStationDataConcurrently(stationIDs []string, startDate, endDate *time.Time, datum noaaclient.Datum, preferredMetric string) (*map[string]*sledgconf_demo_proto_v1.Station, error) {
 	//Precondition check
 	if len(stationIDs) == 0 || startDate == nil || endDate == nil {
 		return nil, customerrors.PreconditionError{Msg: "Missing Mandatory Data"}
@@ -77,19 +71,19 @@ func GetStationDataAsync(stationIDs []string, startDate, endDate *time.Time, dat
 	//Setup the waitgroup
 	var wg sync.WaitGroup
 	wg.Add(len(stationIDs))
-	//Setup an err chan
+	//Setup an error and data chan
 	dataChan := make(chan interface{})
 	//Loop through all the station IDs
 	for _, val := range stationIDs {
 		go func(stationID string) {
 			defer wg.Done()
 			//get all the data from each station
-			stationData, err := getAllDataFromStationAsync(datum, preferredMetric, startDate, endDate, stationID)
+			stationData, err := getAllDataFromStationConcurrently(datum, preferredMetric, startDate, endDate, stationID)
 			if err != nil {
 				dataChan <- err
 				return
 			}
-			//Append it to the full station map response
+			//put the station data on the data channel
 			dataChan <- stationData
 		}(val)
 	}
@@ -117,13 +111,14 @@ func GetStationDataAsync(stationIDs []string, startDate, endDate *time.Time, dat
 	return &mapToReturnOfAllStations, nil
 }
 
+///INTERNAL FUNCTIONS
+
 //internal function to get all the data from a station
-func getAllDataFromStationAsync(datum noaaclient.Datum, preferredMetric string, startDate, endDate *time.Time, stationID string) (*sledgconf_demo_proto_v1.Station, error) {
+func getAllDataFromStationConcurrently(datum noaaclient.Datum, preferredMetric string, startDate, endDate *time.Time, stationID string) (*sledgconf_demo_proto_v1.Station, error) {
 	//Setup the waitgroup
 	var wg sync.WaitGroup
 	//Setup an err chan
 	dataChan := make(chan interface{})
-
 	//Cast the max limit over to an int
 	wg.Add(int(noaaclient.MaximumLimit))
 	stationData := &sledgconf_demo_proto_v1.Station{StationID: stationID}
@@ -165,7 +160,7 @@ func getAllDataFromStationAsync(datum noaaclient.Datum, preferredMetric string, 
 			err := data.(error)
 			return nil, err
 		default:
-			//Log unhandled chan data
+			//TODO: Log or error out on unhandled chan data
 		}
 	}
 	return stationData, nil

@@ -10,22 +10,21 @@ import (
 
 	customerrors "github.com/mornindew/sledgeconf2021/pkg/custom-errors"
 	noaaclient "github.com/mornindew/sledgeconf2021/pkg/noaa-client"
-	tidesandcurrents "github.com/mornindew/sledgeconf2021/pkg/tides-and-currents"
+	"github.com/mornindew/sledgeconf2021/pkg/station"
 )
 
 func main() {
-
-	http.HandleFunc("/station/", reverseRequestHandler)
+	//Setup the handler function
+	http.HandleFunc("/station/", stationRequestHandler)
 	err := http.ListenAndServe(":8888", nil)
 	if err != nil {
 		fmt.Println("Error Starting Server: " + err.Error())
 	}
 }
 
-func reverseRequestHandler(w http.ResponseWriter, req *http.Request) {
-	//Decode the request
-	fmt.Println("CALLING REQUEST")
+func stationRequestHandler(w http.ResponseWriter, req *http.Request) {
 	//Get the stationID from the URL - a framework could help here.  YUK
+	//We use goswagger and it makes this stuff easier but also pretty bloated
 	urlPathSplits := strings.Split(req.URL.Path, "/")
 	//Station is in the 2nd slot
 	stationID := urlPathSplits[2]
@@ -33,7 +32,6 @@ func reverseRequestHandler(w http.ResponseWriter, req *http.Request) {
 	//only do this because the function takes an array
 	arrayOfStationIDs := make([]string, 0)
 	arrayOfStationIDs = append(arrayOfStationIDs, stationID)
-	fmt.Println(stationID)
 	values := req.URL.Query()
 	startTimeEpoch := values.Get("startTime")
 	startTimeEpochInt, err := strconv.ParseInt(startTimeEpoch, 10, 64)
@@ -51,7 +49,7 @@ func reverseRequestHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	endTime := time.Unix(endTimeEpochInt, 0)
 	//Convert the Datum
-	//Datum is in the third
+	//Datum is in the third slot
 	datum := urlPathSplits[3]
 	datumEnum, err := noaaclient.ConvertStringDatumToEnum(datum)
 	if err != nil {
@@ -61,7 +59,7 @@ func reverseRequestHandler(w http.ResponseWriter, req *http.Request) {
 	//Get the preferred Metric - I don't even bother checking as it defaults to metric and nils are impossible
 	preferredMetric := values.Get("preferredMetric")
 
-	stations, err := tidesandcurrents.GetStationDataAsync(arrayOfStationIDs, &startTime, &endTime, datumEnum, preferredMetric)
+	stations, err := station.RetrieveAllStationDataConcurrently(arrayOfStationIDs, &startTime, &endTime, datumEnum, preferredMetric)
 	if err != nil {
 		switch err.(type) {
 		case customerrors.PreconditionError:

@@ -1,5 +1,3 @@
-#NOTE:  This is the "official" build for webservice_redfalcon in docker.   it will reach out to github and download the source from there.  
-# It will also create a minimal image that has 0 extra shit in it.   This should be used in production
 FROM mornindew/base-demo-protobuf:latest as builder
 
 RUN apk add git
@@ -24,6 +22,5 @@ COPY --from=builder /app/ /app/
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 WORKDIR /app
-#CMD ["./server"]
 EXPOSE 50051
 ENTRYPOINT ["./server"]

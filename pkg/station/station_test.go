@@ -1,4 +1,4 @@
-package tidesandcurrents
+package station
 
 import (
 	"encoding/json"
@@ -39,7 +39,7 @@ func TestGetTidesAndCurrentsSync(t *testing.T) {
 
 	//Time the call
 	callStartTime := time.Now()
-	stationData, err := GetStationDataSync(stationIDs, &startTime, &endTime, noaaclient.CRD, noaaclient.Metric.String())
+	stationData, err := RetrieveAllStationDataSync(stationIDs, &startTime, &endTime, noaaclient.CRD, noaaclient.Metric.String())
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -68,11 +68,10 @@ func TestGetTidesAndCurrentsSync(t *testing.T) {
 			fmt.Println("		" + string(b))
 		}
 	}
-
 }
 
-//GetTidesAndCurrentsSyncTest - Will test the syncronous getting of the tides and currents
-func TestGetTidesAndCurrentsAsync(t *testing.T) {
+//TestGetTidesAndCurrentsConcurrently - Will test the syncronous getting of the tides and currents
+func TestGetTidesAndCurrentsConcurrently(t *testing.T) {
 
 	//Convert the station list to a map
 	stationIDs := make([]string, 0)
@@ -87,7 +86,7 @@ func TestGetTidesAndCurrentsAsync(t *testing.T) {
 
 	//Time the call
 	callStartTime := time.Now()
-	stationData, err := GetStationDataAsync(stationIDs, &startTime, &endTime, noaaclient.CRD, noaaclient.Metric.String())
+	stationData, err := RetrieveAllStationDataConcurrently(stationIDs, &startTime, &endTime, noaaclient.CRD, noaaclient.Metric.String())
 	if err != nil {
 		t.Error(err.Error())
 	}

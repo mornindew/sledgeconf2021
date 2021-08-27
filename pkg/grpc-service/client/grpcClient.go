@@ -1,3 +1,4 @@
+//Main Client for making calls into the microservice over GRPC
 package grpcclient
 
 import (
@@ -18,13 +19,11 @@ type GrpcServiceClient struct {
 	timeout  time.Duration
 }
 
-/*
-ConstructClient - Constructor to return a client
-
-Typically the constructor doesn't take any vars but this one does so that I can use the same client on different service locations.
-
-Normally I would use an Environment Variable to pull the DNS location for the client
-*/
+//ConstructClient - Constructor to return a client
+//
+//Typically the constructor doesn't take any vars but this one does so that I can use the same client on different service locations.
+//
+//Normally I would use an Environment Variable to pull the DNS location for the client
 func ConstructClient(location string) (*GrpcServiceClient, error) {
 	//Precondition
 	if location == "" {
@@ -47,9 +46,15 @@ func ConstructClient(location string) (*GrpcServiceClient, error) {
 
 //GrpcServiceClient - methods
 
-/*
-ReverseArray - call into the grpcService and will reverse the array
-*/
+//GetDataFromStations - main client method that will get all available data from the station that is passed in.
+//This GRPC call stays open for a while as calls with large sets of stationIDs can take a while
+//
+//Returns - a map representing each station and all its data
+//
+//Errors:
+//	Precondition: missing mandatory data
+//	Invalid Data: Data is invalid and won't work (e.g. start date after end date)
+//  Internal Server: Catch all for the remaining errors
 func (client *GrpcServiceClient) GetDataFromStations(stationIDs *[]string, startTime, endTime *time.Time, datum string, metricPreference sledgconf_demo_proto_v1.MetricPreference) (*map[string]*sledgconf_demo_proto_v1.Station, error) {
 	//Precondition Check - I do a precondition check in the client to avoid making a call to the server for anything that isn't well constructed
 	//Pattern that I follow here is that I typically check for the existance of mandatory data in the client but check for quality of data in the server

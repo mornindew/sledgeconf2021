@@ -37,7 +37,7 @@ func NewNoaaClient(datum Datum, preferredMetric string) *NoaaClient {
 	return noaaClientToReturn
 }
 
-//Public Methods on the client
+//RetreiveDataVariable - will retreive a specific data set from the noaa station.  It will return empty values if the site doesn't have that data.
 func (object *NoaaClient) RetreiveDataVariable(startDate, endDate *time.Time, dataProduct DataProduct, stationID *string) (*sledgconf_demo_proto_v1.ProductDataValues, error) {
 	//Precondition
 	if startDate == nil || endDate == nil || stationID == nil {

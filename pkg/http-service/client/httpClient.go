@@ -15,6 +15,7 @@ type StationDataHttpClient struct {
 	serviceName string
 }
 
+//CreateClient constructs that will create the client.  It will return the http client to use
 func CreateClient(serviceName string) (*StationDataHttpClient, error) {
 	if serviceName == "" {
 		return nil, customerrors.ClientConstructionError{Msg: "Empty Service Name"}
@@ -23,17 +24,15 @@ func CreateClient(serviceName string) (*StationDataHttpClient, error) {
 	return client, nil
 }
 
-//GetDataFromStations - simple http client to get the data from a station
+//GetDataFromStations - Simple http call to get all the data from a specific station ID.  It will return the Station Struct with any data that was found
 func (v *StationDataHttpClient) GetDataFromStation(stationID string, startTime, endTime *time.Time, datum string, metricPreference sledgconf_demo_proto_v1.MetricPreference) (*sledgconf_demo_proto_v1.Station, error) {
 
-	//Preconidtion
-
+	// Preconidtion
 	if stationID == "" || startTime == nil || endTime == nil || datum == "" {
 		return nil, customerrors.PreconditionError{Msg: "Missing Mandatory Values"}
 	}
-
+	//Build the URL
 	fullPath := "http://" + v.serviceName + "/station/" + stationID + "/" + datum
-
 	base, err := url.Parse(fullPath)
 	if err != nil {
 		return nil, customerrors.InternalServerError{Msg: "Error Calling Service: " + err.Error()}
@@ -74,6 +73,5 @@ func (v *StationDataHttpClient) GetDataFromStation(stationID string, startTime, 
 		//This is weird since we didn't get an error so we will return an empty struct
 		return &sledgconf_demo_proto_v1.Station{}, nil
 	}
-
 	return val, nil
 }
